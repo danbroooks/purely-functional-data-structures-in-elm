@@ -5,7 +5,7 @@ module FPWarmup exposing
   , take
   )
 
-import List exposing (foldr)
+import List exposing (foldr, length)
 
 digitsOfInt : Int -> List Int
 digitsOfInt n =
@@ -35,13 +35,9 @@ subsequences xs =
 
 take : Int -> List a -> Result String (List a)
 take k xs =
-  if k > 0 then
-    case xs of
-      [] -> Err "not enough elements"
-      (h :: t) -> case (take (k - 1) t) of
-        Ok ys -> Ok (h :: ys)
-        x -> x
+  if length xs < k then
+    Err "not enough elements"
   else if k < 0 then
     Err "negative index"
   else
-    Ok []
+    Ok (List.take k xs)
