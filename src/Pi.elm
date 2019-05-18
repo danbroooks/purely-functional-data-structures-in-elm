@@ -2,17 +2,20 @@ module Pi exposing (main)
 
 -- Add/modify imports if you'd like. ---------------------------------
 
-import Html exposing (Html)
-import Random exposing (Generator, Seed)
+import Browser exposing (Document)
+import Html exposing (..)
+import Json.Decode as Decode exposing (Value)
+import Random exposing (Generator, Seed, float, initialSeed, map2)
 import Time
+import Url exposing (Url)
 
 
 ----------------------------------------------------------------------
 
 
-main : Program Never Model Msg
+main : Program Value Model Msg
 main =
-    Html.program
+    Browser.document
         { init = init
         , view = view
         , update = update
@@ -37,31 +40,43 @@ type Msg
     = Tick
 
 
-init : ( Model, Cmd Msg )
-init =
+init : flags -> ( Model, Cmd Msg )
+init _ =
     ( initialModel, Cmd.none )
 
 
 initialModel : Model
 initialModel =
-    Debug.crash "TODO"
+    { hits = []
+    , misses = []
+    , hitCount = 0
+    , missCount = 0
+    , seed = initialSeed 3333
+    }
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Debug.crash "TODO"
+    Sub.none
 
 
 pointGenerator : Generator Point
 pointGenerator =
-    Debug.crash "TODO"
+    map2 Point (float 0 20) (float 0 20)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    Debug.crash "TODO"
+    ( model, Cmd.none )
 
 
-view : Model -> Html Msg
+body : Model -> List (Html Msg)
+body model =
+    [ text "Pi" ]
+
+
+view : Model -> Document Msg
 view model =
-    Debug.crash "TODO"
+    { title = "Pi"
+    , body = body model
+    }
