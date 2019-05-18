@@ -6,7 +6,8 @@ import Browser exposing (Document)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Random exposing (Generator, Seed, float, initialSeed, map2)
-import Time
+import String exposing (fromInt)
+import Time exposing (every)
 import Url exposing (Url)
 
 
@@ -57,7 +58,7 @@ initialModel =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    every 1000 (always Tick)
 
 
 pointGenerator : Generator Point
@@ -67,12 +68,14 @@ pointGenerator =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Tick ->
+            ( { model | hitCount = model.hitCount + 1 }, Cmd.none )
 
 
 body : Model -> List (Html Msg)
 body model =
-    [ text "Pi" ]
+    [ text "Pi: ", text (fromInt model.hitCount) ]
 
 
 view : Model -> Document Msg
