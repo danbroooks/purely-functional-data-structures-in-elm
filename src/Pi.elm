@@ -123,12 +123,13 @@ collage model =
 
 
 renderPoints : Color -> List Point -> Collage msg -> Collage msg
-renderPoints c pts col =
-    let
-        f pt =
-            at (\_ -> ( pt.x, pt.y )) (dot c)
-    in
-    List.foldr f col pts
+renderPoints color pts col =
+    List.foldr (renderPoint color) col pts
+
+
+renderPoint : Color -> Point -> Collage msg -> Collage msg
+renderPoint c pt =
+    at (\_ -> ( pt.x, pt.y )) (dot c)
 
 
 board : Collage msg
