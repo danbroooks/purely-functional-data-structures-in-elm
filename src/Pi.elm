@@ -102,10 +102,12 @@ pointHit pt =
     size > sqrt (xSq + ySq)
 
 
+addHit : Model -> Point -> Model
 addHit model pt =
     { model | hits = pt :: model.hits }
 
 
+addMiss : Model -> Point -> Model
 addMiss model pt =
     { model | misses = pt :: model.misses }
 
