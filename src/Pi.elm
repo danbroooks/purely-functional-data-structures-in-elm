@@ -3,7 +3,7 @@ module Pi exposing (main)
 -- Add/modify imports if you'd like. ---------------------------------
 
 import Browser exposing (Document)
-import Collage exposing (Collage, Shape, circle, filled, rectangle, uniform)
+import Collage exposing (Collage, Shape, circle, filled, square, uniform)
 import Collage.Layout exposing (at, empty, impose, topLeft)
 import Collage.Render exposing (svg)
 import Color exposing (Color, green, red, white)
@@ -42,6 +42,11 @@ type alias Model =
     }
 
 
+size : Float
+size =
+    200
+
+
 type Msg
     = Tick
     | FirePoint Point
@@ -64,12 +69,12 @@ initialModel =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    every 1000 (always Tick)
+    every 10 (always Tick)
 
 
 pointGenerator : Generator Point
 pointGenerator =
-    map2 Point (float 0 20) (float 0 20)
+    map2 Point (float -size size) (float -size size)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,17 +84,30 @@ update msg model =
             ( model, Cmd.batch [ generate FirePoint pointGenerator ] )
 
         FirePoint pt ->
-            ( { model | hits = pt :: model.hits }, Cmd.none )
+            if pointHit pt then
+                ( addHit model pt, Cmd.none )
+            else
+                ( addMiss model pt, Cmd.none )
 
 
-width : Float
-width =
-    400
+pointHit : Point -> Bool
+pointHit pt =
+    let
+        xSq =
+            abs pt.x ^ 2
+
+        ySq =
+            abs pt.y ^ 2
+    in
+    size > sqrt (xSq + ySq)
 
 
-height : Float
-height =
-    400
+addHit model pt =
+    { model | hits = pt :: model.hits }
+
+
+addMiss model pt =
+    { model | misses = pt :: model.misses }
 
 
 body : Model -> List (Html Msg)
@@ -99,20 +117,23 @@ body model =
 
 collage : Model -> Collage msg
 collage model =
-    box
-        |> draw (dot green) 0 10
-        |> draw (dot red) 0 0
-        |> draw (dot green) 20 15
+    board
+        |> renderPoints green model.hits
+        |> renderPoints red model.misses
 
 
-draw : Collage msg -> Float -> Float -> Collage msg -> Collage msg
-draw shape x y =
-    at (\_ -> ( x - (width / 2), -y + (height / 2) )) shape
+renderPoints : Color -> List Point -> Collage msg -> Collage msg
+renderPoints c pts col =
+    let
+        f pt =
+            at (\_ -> ( pt.x, pt.y )) (dot c)
+    in
+    List.foldr f col pts
 
 
-box : Collage msg
-box =
-    filled (uniform white) (rectangle width height)
+board : Collage msg
+board =
+    filled (uniform white) <| square (size * 2)
 
 
 dot : Color -> Collage msg
