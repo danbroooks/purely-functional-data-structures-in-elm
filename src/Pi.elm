@@ -3,9 +3,14 @@ module Pi exposing (main)
 -- Add/modify imports if you'd like. ---------------------------------
 
 import Browser exposing (Document)
+import Collage exposing (Collage, Shape, circle, filled, rectangle, uniform)
+import Collage.Layout exposing (at, empty, impose, topLeft)
+import Collage.Render exposing (svg)
+import Color exposing (Color, green, red, white)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
-import Random exposing (Generator, Seed, float, initialSeed, map2)
+import List exposing (length)
+import Random exposing (Generator, Seed, float, generate, initialSeed, map2)
 import String exposing (fromInt)
 import Time exposing (every)
 import Url exposing (Url)
@@ -39,6 +44,7 @@ type alias Model =
 
 type Msg
     = Tick
+    | FirePoint Point
 
 
 init : flags -> ( Model, Cmd Msg )
@@ -70,12 +76,48 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick ->
-            ( { model | hitCount = model.hitCount + 1 }, Cmd.none )
+            ( model, Cmd.batch [ generate FirePoint pointGenerator ] )
+
+        FirePoint pt ->
+            ( { model | hits = pt :: model.hits }, Cmd.none )
+
+
+width : Float
+width =
+    400
+
+
+height : Float
+height =
+    400
 
 
 body : Model -> List (Html Msg)
 body model =
-    [ text "Pi: ", text (fromInt model.hitCount) ]
+    [ svg (collage model) ]
+
+
+collage : Model -> Collage msg
+collage model =
+    box
+        |> draw (dot green) 0 10
+        |> draw (dot red) 0 0
+        |> draw (dot green) 20 15
+
+
+draw : Collage msg -> Float -> Float -> Collage msg -> Collage msg
+draw shape x y =
+    at (\_ -> ( x - (width / 2), -y + (height / 2) )) shape
+
+
+box : Collage msg
+box =
+    filled (uniform white) (rectangle width height)
+
+
+dot : Color -> Collage msg
+dot c =
+    filled (uniform c) (circle 3)
 
 
 view : Model -> Document Msg
