@@ -16,7 +16,12 @@ module ListsAndTrees
 
 suffixes : List a -> List (List a)
 suffixes xs =
-    []
+    case xs of
+        _ :: t ->
+            xs :: suffixes t
+
+        [] ->
+            [ xs ]
 
 
 
