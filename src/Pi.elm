@@ -10,7 +10,7 @@ import Color exposing (Color, green, red, white)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import List exposing (length)
-import Random exposing (Generator, Seed, float, generate, initialSeed, map2)
+import Random exposing (Generator, Seed, generate, initialSeed, int, map, map2)
 import String exposing (fromInt)
 import Time exposing (every)
 import Url exposing (Url)
@@ -31,6 +31,11 @@ main =
 
 type alias Point =
     { x : Float, y : Float }
+
+
+multiplyPoint : Float -> Point -> Point
+multiplyPoint n pt =
+    { x = pt.x * n, y = pt.y * n }
 
 
 type alias Model =
@@ -74,7 +79,16 @@ subscriptions model =
 
 pointGenerator : Generator Point
 pointGenerator =
-    map2 Point (float -size size) (float -size size)
+    let
+        s =
+            floor (size / 5)
+
+        genNum =
+            int -s s
+                |> map toFloat
+    in
+    map2 Point genNum genNum
+        |> map (multiplyPoint 5)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,10 +98,17 @@ update msg model =
             ( model, Cmd.batch [ generate FirePoint pointGenerator ] )
 
         FirePoint pt ->
-            if pointHit pt then
+            if pointSeen pt model then
+                ( model, Cmd.batch [ generate FirePoint pointGenerator ] )
+            else if pointHit pt then
                 ( addHit model pt, Cmd.none )
             else
                 ( addMiss model pt, Cmd.none )
+
+
+pointSeen : Point -> Model -> Bool
+pointSeen pt model =
+    List.member pt model.hits || List.member pt model.misses
 
 
 pointHit : Point -> Bool
@@ -104,12 +125,20 @@ pointHit pt =
 
 addHit : Model -> Point -> Model
 addHit model pt =
-    { model | hits = pt :: model.hits }
+    { model | hits = insertNew pt model.hits }
 
 
 addMiss : Model -> Point -> Model
 addMiss model pt =
-    { model | misses = pt :: model.misses }
+    { model | misses = insertNew pt model.misses }
+
+
+insertNew : a -> List a -> List a
+insertNew x xs =
+    if List.member x xs then
+        xs
+    else
+        x :: xs
 
 
 body : Model -> List (Html Msg)
