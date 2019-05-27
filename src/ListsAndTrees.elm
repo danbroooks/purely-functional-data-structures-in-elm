@@ -1,6 +1,7 @@
 module ListsAndTrees
     exposing
-        ( almostCompleteTrees
+        ( Tree(..)
+        , almostCompleteTrees
         , balancedTree
         , balancedTrees
         , completeTrees
@@ -36,8 +37,21 @@ type Tree a
 
 
 mem : comparable -> Tree comparable -> Bool
-mem _ _ =
-    False
+mem x t =
+    case t of
+        Node a left right ->
+            case compare a x of
+                EQ ->
+                    True
+
+                GT ->
+                    mem x left
+
+                LT ->
+                    mem x right
+
+        Empty ->
+            False
 
 
 fullTree : a -> Int -> Tree a
