@@ -55,8 +55,15 @@ mem x t =
 
 
 fullTree : a -> Int -> Tree a
-fullTree _ _ =
-    Empty
+fullTree x h =
+    if h > 0 then
+        let
+            r =
+                fullTree x (h - 1)
+        in
+        Node x r r
+    else
+        Empty
 
 
 balancedTree : a -> Int -> Tree a
